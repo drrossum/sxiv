@@ -56,10 +56,10 @@ static void img_apply_cms(const fileinfo_t *file)
 {
 	cmsHPROFILE pimg, pdev;
 
-	if (*DISPLAY_PROFILE == '\0')
+	if (*options->display_profile == '\0')
 		return;
 
-	pdev = cmsOpenProfileFromFile(DISPLAY_PROFILE, "r");
+	pdev = cmsOpenProfileFromFile(options->display_profile, "r");
 	if (pdev == NULL)
 		return;
 
