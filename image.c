@@ -51,22 +51,6 @@ static int zoomdiff(float z1, float z2)
 	return (int) (z1 * 1000.0 - z2 * 1000.0);
 }
 
-static void img_apply_gamma(img_t *img)
-{
-	if (img == NULL || img->im == NULL || img->cmod == NULL)
-		return;
-	
-	if (img->gamma == 0) {
-		imlib_context_set_color_modifier(NULL);
-	} else {
-		double range = img->gamma <= 0 ? 1.0 : GAMMA_MAX - 1.0;
-
-		imlib_context_set_color_modifier(img->cmod);
-		imlib_reset_color_modifier();
-		imlib_modify_color_modifier_gamma(1.0 + img->gamma * (range / GAMMA_RANGE));
-	}
-}
-
 #ifdef HAVE_CMS
 static void img_apply_cms(const fileinfo_t *file)
 {
@@ -368,8 +352,6 @@ bool img_load(img_t *img, const fileinfo_t *file)
 			img_load_gif(img, file);
 #endif
 	}
-
-	img_apply_gamma(img);
 
 #if HAVE_CMS
 	img_apply_cms(file);
