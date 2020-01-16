@@ -60,6 +60,7 @@ void parse_options(int argc, char **argv)
 	_options.gamma = 0;
 	_options.slideshow = 0;
 	_options.framerate = 0;
+	_options.display_profile = DISPLAY_PROFILE;
 
 	_options.fullscreen = false;
 	_options.embed = 0;
@@ -72,7 +73,7 @@ void parse_options(int argc, char **argv)
 	_options.clean_cache = false;
 	_options.private_mode = false;
 
-	while ((opt = getopt(argc, argv, "A:abce:fG:g:hin:N:opqrS:s:tvZz:")) != -1) {
+	while ((opt = getopt(argc, argv, "A:abce:fG:g:hin:N:opqrS:s:tvZz:P:")) != -1) {
 		switch (opt) {
 			case '?':
 				print_usage();
@@ -165,6 +166,9 @@ void parse_options(int argc, char **argv)
 					error(EXIT_FAILURE, 0, "Invalid argument for option -z: %s", optarg);
 				_options.scalemode = SCALE_ZOOM;
 				_options.zoom = (float) n / 100.0;
+				break;
+			case 'P':
+				_options.display_profile = optarg;
 				break;
 		}
 	}

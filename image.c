@@ -36,6 +36,11 @@
 enum { DEF_GIF_DELAY = 75 };
 #endif
 
+#if HAVE_CMS
+#include <lcms2.h>
+cmsHPROFILE img_get_colorspace(const fileinfo_t *file);
+#endif
+
 float zoom_min;
 float zoom_max;
 
@@ -43,6 +48,35 @@ static int zoomdiff(img_t *img, float z)
 {
 	return (int) ((img->w * z - img->w * img->zoom) + (img->h * z - img->h * img->zoom));
 }
+
+#ifdef HAVE_CMS
+static void img_apply_cms(const fileinfo_t *file)
+{
+	cmsHPROFILE pimg, pdev;
+
+	if (*options->display_profile == '\0')
+		return;
+
+	pdev = cmsOpenProfileFromFile(options->display_profile, "r");
+	if (pdev == NULL)
+		return;
+
+	pimg = img_get_colorspace(file);
+
+	cmsHTRANSFORM tf = cmsCreateTransform(pimg, TYPE_BGRA_8, pdev, TYPE_BGRA_8, INTENT_RELATIVE_COLORIMETRIC, 0);
+	if (tf != NULL) {
+		int size = imlib_image_get_width() * imlib_image_get_height();
+		DATA32 *data = imlib_image_get_data();
+		cmsDoTransform(tf, data, data, size);
+		imlib_image_put_back_data(data);
+
+		cmsDeleteTransform(tf);
+	}
+
+	cmsCloseProfile(pimg);
+	cmsCloseProfile(pdev);
+}
+#endif
 
 void img_init(img_t *img, win_t *win)
 {
@@ -334,6 +368,11 @@ bool img_load(img_t *img, const fileinfo_t *file)
 			img_load_gif(img, file);
 #endif
 	}
+
+#if HAVE_CMS
+	img_apply_cms(file);
+#endif
+
 	img->w = imlib_image_get_width();
 	img->h = imlib_image_get_height();
 	img->checkpan = true;
